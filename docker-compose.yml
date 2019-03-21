@@ -1,6 +1,6 @@
-version: '2'
+version: '3.6'
 
-services:    
+services:
     consul:
         container_name: consul
         image: consul:latest
@@ -15,14 +15,13 @@ services:
     vault:
         container_name: vault
         image: vault
-        links:
-            - consul:consul
-        depends_on:
-            - consul
+
+
         ports:
             - "8200:8200"
-        volumes_from:
-            - consul
+        volumes:
+          - ./config:/config
+
         cap_add:
             - IPC_LOCK
         command: server -config=/config/vault.hcl
@@ -32,8 +31,7 @@ services:
         image: djenriquez/vault-ui
         ports:
             - "8000:8000"
-        links:
-            - vault:vault
+
         environment:
             NODE_TLS_REJECT_UNAUTHORIZED: 0
             VAULT_URL_DEFAULT: https://vault:8200
@@ -41,8 +39,7 @@ services:
     backup:
         container_name: backup
         build: backup/
-        links:
-            - consul:consul
+
         volumes:
             - ./_data/backup:/backup/
         command: consul-backup

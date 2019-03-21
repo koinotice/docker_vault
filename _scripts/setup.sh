@@ -5,22 +5,24 @@ export VAULT_ADDR=http://127.0.0.1:8200
 
 ## INIT VAULT
 echo "[*] Init vault..."
-vault init -address=${VAULT_ADDR} > ./_data/keys.txt
+vault operator init -address=${VAULT_ADDR} > ./_data/keys.txt
 export VAULT_TOKEN=$(grep 'Initial Root Token:' ./_data/keys.txt | awk '{print substr($NF, 1, length($NF)-1)}')
 
 ## UNSEAL VAULT
 echo "[*] Unseal vault..."
-vault unseal -address=${VAULT_ADDR} $(grep 'Key 1:' ./_data/keys.txt | awk '{print $NF}')
-vault unseal -address=${VAULT_ADDR} $(grep 'Key 2:' ./_data/keys.txt | awk '{print $NF}')
-vault unseal -address=${VAULT_ADDR} $(grep 'Key 3:' ./_data/keys.txt | awk '{print $NF}')
+vault operator unseal -address=${VAULT_ADDR} $(grep 'Key 1:' ./_data/keys.txt | awk '{print $NF}')
+vault operator unseal -address=${VAULT_ADDR} $(grep 'Key 2:' ./_data/keys.txt | awk '{print $NF}')
+vault  operator unseal -address=${VAULT_ADDR} $(grep 'Key 3:' ./_data/keys.txt | awk '{print $NF}')
 
 ## AUTH
 echo "[*] Auth..."
-vault auth -address=${VAULT_ADDR} ${VAULT_TOKEN}
+vault login -address=${VAULT_ADDR} ${VAULT_TOKEN}
+
+
 
 ## CREATE USER
 echo "[*] Create user... Remember to change the defaults!!"
-vault auth-enable  -address=${VAULT_ADDR} userpass
+vault auth enable  -address=${VAULT_ADDR} userpass
 vault policy-write -address=${VAULT_ADDR} admin ./config/admin.hcl
 vault write -address=${VAULT_ADDR} auth/userpass/users/webui password=webui policies=admin
 
